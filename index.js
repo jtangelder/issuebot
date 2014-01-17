@@ -29,16 +29,20 @@ function daysAgo(date) {
   return Math.floor((now - new Date(date)) / 1000 / (3600*24));
 }
 
+function setState(issue, repo, state, cb) {
+  client.issues.edit({
+    repo: repo.repo,
+    user: repo.user,
+    number: issue.number,
+    state: state
+  }, cb);
+}
+
 // auto close when overdue
 function autoCloseIssue(issue, repo) {
   // when a comment was placed after it was closed, reopen it
   if(issue.state == 'closed' && new Date(issue.updated_at) > new Date(issue.closed_at)) {
-    client.issues.edit({
-      repo: repo.repo,
-      user: repo.user,
-      number: issue.number,
-      state: 'open'
-    });
+    setState(issue, repo, 'open');
   }
 
   // overdue
@@ -49,13 +53,7 @@ function autoCloseIssue(issue, repo) {
       number: issue.number,
       body: message
     }, function() {
-      client.issues.edit({
-        repo: repo.repo,
-        user: repo.user,
-        number: issue.number,
-        state: 'closed'
-      });
-
+      setState(issue, repo, 'closed');
       console.log('closed #'+ issue.number +' of '+ issue.user+'/'+issue.repo);
     });
   }
