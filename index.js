@@ -1,8 +1,9 @@
 var fs = require('fs');
+var path = require('path');
 var github = require('github');
 
 var now = new Date();
-var message = fs.readFileSync("close_msg.txt", {encoding:'utf-8'});
+var message = fs.readFileSync(path.join(__dirname, "close_msg.txt"), {encoding:'utf-8'});
 
 // add your repos
 var autoclose_repos = [
