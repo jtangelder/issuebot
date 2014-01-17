@@ -50,6 +50,7 @@ function autoCloseIssue(issue, repo) {
 }
 
 // walk repos
+console.log('Starting '+ now.toUTCString() +'...');
 autoclose_repos.forEach(function(repo) {
   var options = {
     repo: repo.repo,
