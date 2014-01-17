@@ -1,3 +1,3 @@
 **Issuebot:**
 This issue is auto-closed because it's last activity was too long ago.
-If you think the issue is still active, please re-open it!
+If you think the issue is still active, please comment to re-open it!

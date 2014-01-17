@@ -31,42 +31,56 @@ function daysAgo(date) {
 
 // auto close when overdue
 function autoCloseIssue(issue, repo) {
-  if(daysAgo(issue.updated_at) > repo.days) {
+  // when a comment was placed after it was closed, reopen it
+  if(issue.state == 'closed' && new Date(issue.updated_at) > new Date(issue.closed_at)) {
     client.issues.edit({
       repo: repo.repo,
       user: repo.user,
       number: issue.number,
-      state: 'closed'
+      state: 'open'
     });
+  }
 
+  // overdue
+  else if(daysAgo(issue.updated_at) > repo.days) {
     client.issues.createComment({
       repo: repo.repo,
       user: repo.user,
       number: issue.number,
       body: message
-    });
+    }, function() {
+      client.issues.edit({
+        repo: repo.repo,
+        user: repo.user,
+        number: issue.number,
+        state: 'closed'
+      });
 
-    console.log('closed #'+ issue.number +' of '+ issue.user+'/'+issue.repo);
+      console.log('closed #'+ issue.number +' of '+ issue.user+'/'+issue.repo);
+    });
   }
 }
 
 // walk repos
 console.log('Starting '+ now.toUTCString() +'...');
 autoclose_repos.forEach(function(repo) {
-  var options = {
-    repo: repo.repo,
-    user: repo.user,
-    state: 'open',
-    per_page: 200
-  };
+  (['open','closed']).forEach(function(state) {
+    var options = {
+      repo: repo.repo,
+      user: repo.user,
+      state: state,
+      per_page: 200
+    };
 
-  client.issues.repoIssues(options, function(err, items) {
-    if(err) {
-      return console.log(err);
-    }
+    client.issues.repoIssues(options, function(err, items) {
+      if(err) {
+        return console.log(err);
+      }
 
-    return items.forEach(function(issue) {
-      autoCloseIssue(issue, repo);
+      return items.forEach(function(issue) {
+        autoCloseIssue(issue, repo);
+      });
     });
   });
+
 });
